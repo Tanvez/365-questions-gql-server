@@ -6,10 +6,20 @@ export const resolvers = {
     hello: () => 'Hello',
     questions: () => Question.find(),
     answers: () => Answer.find(),
-    question: async (parent, args, context, info) => {
-      const result = await Question.findOne({ _id: args.id });
-      console.log({ result });
+    answer: async (_, { id }) => {
+      const result = await Answer.findOne({ _id: id });
       return result;
+    },
+    question: async (_, { id }) => {
+      const result = await Question.findOne({ _id: id });
+      return result;
+    },
+  },
+  // for nested queries
+  Answer: {
+    question: parent => {
+      console.log({ parent });
+      return Question.findOne({ _id: parent.questionId });
     },
   },
   Mutation: {
@@ -18,19 +28,13 @@ export const resolvers = {
       await newQuestion.save();
       return newQuestion;
     },
-    answerQuestion: async (_, { answer, questionId, question }) => {
+    answerQuestion: async (_, { answer, questionId }) => {
       const newAnswer = new Answer({
         answer,
-        question: { _id: questionId, question },
+        questionId,
       });
       await newAnswer.save();
-      const result = await Question.findOneAndUpdate(
-        { _id: questionId },
-        { $push: { answers: newAnswer } },
-        { new: true }
-      );
-
-      return result;
+      return newAnswer;
     },
   },
 };
