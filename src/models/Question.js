@@ -3,7 +3,12 @@ import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
 const questionSchema = new Schema({
-  question: String,
+  question: {
+    type: String,
+    required: true,
+    unique: true,
+    uniqueCaseInsensitive: true,
+  },
   date: { type: Date, default: Date.now },
 });
 
