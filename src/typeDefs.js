@@ -25,6 +25,7 @@ export const typeDefs = gql`
     answers: [Answer!]!
     question(id: ID!): Question
     answer(id: ID!): Answer!
+    currentUser: User!
   }
 
   type AuthPayload {
@@ -34,8 +35,8 @@ export const typeDefs = gql`
 
   type Mutation {
     createQuestion(question: String!): Question
-    answerQuestion(answer: String!, questionId: ID!): Question
-    signup(email: String!, password: String!, name: String!): AuthPayload
-    login(email: String!, password: String!): AuthPayload
+    answerQuestion(answer: String!, questionId: ID!, userId: ID!): Question
+    signup(email: String!, password: String!, username: String!): AuthPayload!
+    login(username: String!, password: String!): AuthPayload!
   }
 `;

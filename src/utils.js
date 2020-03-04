@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const { APP_SECRET } = process.env;
 
-const getUser = token => {
+const verifyToken = token => {
   try {
     if (token) {
       return jwt.verify(token, APP_SECRET);
@@ -14,5 +14,5 @@ const getUser = token => {
 };
 
 module.exports = {
-  getUser,
+  verifyToken,
 };

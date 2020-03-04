@@ -7,24 +7,27 @@ const { APP_SECRET } = process.env;
 export const resolvers = {
   Query: {
     hello: () => 'Hello',
-    questions: () => Question.find(),
-    answers: () => Answer.find(),
-    answer: async (_, { id }) => {
+    questions: async (_, args, { user }) => {
+      if (!user) throw new Error('Not Authenticated');
+      const result = await Question.find();
+      return result;
+    },
+    answers: async (_, args, { user }) => {
+      console.log(user);
+      if (!user) throw new Error('Not Authenticated');
+      const result = await Answer.find();
+      return result;
+    },
+    answer: async (_, { id }, { user }) => {
+      if (!user) throw new Error('Not Authenticated');
       const result = await Answer.findOne({ _id: id });
       return result;
     },
-    question: async (_, { id }) => {
+    question: async (_, { id }, { user }) => {
+      if (!user) throw new Error('Not Authenticated');
       const result = await Question.findOne({ _id: id });
       return result;
     },
-    // users: (_, args, context) => {
-    //   // In this case, we'll pretend there is no data when
-    //   // we're not logged in. Another option would be to
-    //   // throw an error.
-    //   if (!context.user) return [];
-
-    //   return ['bob', 'jake'];
-    // },
   },
   // for nested queries
   Answer: {
@@ -36,10 +39,11 @@ export const resolvers = {
       await newQuestion.save();
       return newQuestion;
     },
-    answerQuestion: async (_, { answer, questionId }) => {
+    answerQuestion: async (_, { answer, questionId, userId }) => {
       const newAnswer = new Answer({
         answer,
         questionId,
+        userId,
       });
       await newAnswer.save();
       return newAnswer;
@@ -55,16 +59,16 @@ export const resolvers = {
         user,
       };
     },
-    login: async (_, args) => {
-      const user = await User.findOne({ email: args.email });
+    login: async (_, { username, password }) => {
+      const user = await User.findOne({ username });
       if (!user) {
         throw new Error('No such user found');
       }
-      const valid = await bcrypt.compare(args.password, user.password);
+      const valid = await bcrypt.compare(password, user.password);
       if (!valid) {
         throw new Error('Invalid password');
       }
-      const token = jwt.sign({ userId: user.id }, APP_SECRET);
+      const token = jwt.sign({ id: user.id, username }, APP_SECRET);
 
       return {
         token,
