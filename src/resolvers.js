@@ -13,7 +13,6 @@ export const resolvers = {
       return result;
     },
     answers: async (_, args, { user }) => {
-      console.log(user);
       if (!user) throw new Error('Not Authenticated');
       const result = await Answer.find();
       return result;
@@ -34,12 +33,14 @@ export const resolvers = {
     question: parent => Question.findOne({ _id: parent.questionId }),
   },
   Mutation: {
-    createQuestion: async (_, { question }) => {
+    createQuestion: async (_, { question }, { user }) => {
+      if (!user) throw new Error('Not Authenticated');
       const newQuestion = new Question({ question });
       await newQuestion.save();
       return newQuestion;
     },
-    answerQuestion: async (_, { answer, questionId, userId }) => {
+    answerQuestion: async (_, { answer, questionId, userId }, { user }) => {
+      if (!user) throw new Error('Not Authenticated');
       const newAnswer = new Answer({
         answer,
         questionId,
